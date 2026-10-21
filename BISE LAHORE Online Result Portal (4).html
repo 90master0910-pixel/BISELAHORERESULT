@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BISE LAHORE - Online Result Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & Serif for authentic portal feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bise: {
+                            green: '#005a2b',
+                            darkgreen: '#00401e',
+                            gold: '#d4af37',
+                            lightgold: '#f9f3db',
+                            lightbg: '#f4f7f5'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Merriweather', 'serif'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Print styles for authentic Result Card printing */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printArea, #printArea * {
+                visibility: visible;
+            }
+            #printArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 15px;
+                background: #fff !important;
+                color: #000 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .watermark {
+                opacity: 0.08 !important;
+            }
+        }
+
+        /* Subtle watermarking effect for DMC modal */
+        .watermark-bg {
+            background-image: radial-gradient(#005a2b 0.75px, transparent 0.75px);
+            background-size: 16px 16px;
+            opacity: 0.03;
+        }
+
+        .bise-badge {
+            box-shadow: inset 0 0 0 2px #d4af37;
+        }
+
+        /* Motion Graphics & Countdown Animation Effects */
+        @keyframes subtleGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.25), inset 0 0 10px rgba(0, 90, 43, 0.15); }
+            50% { box-shadow: 0 0 28px rgba(212, 175, 55, 0.55), inset 0 0 18px rgba(0, 90, 43, 0.3); }
+        }
+
+        @keyframes floatBadge {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+
+        @keyframes digitPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .countdown-container {
+            background: linear-gradient(135deg, #00401e 0%, #005a2b 60%, #002d15 100%);
+            animation: subtleGlow 4s infinite ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .countdown-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 60%);
+            pointer-events: none;
+            animation: floatBadge 6s infinite ease-in-out;
+        }
+
+        .countdown-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .countdown-card:hover {
+            border-color: rgba(212, 175, 55, 0.8);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .digit-animated {
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+        }
+
+        .pulse-live {
+            animation: digitPulse 1s infinite;
+        }
+    </style>
+</head>
+<body class="bg-bise-lightbg font-sans min-h-screen flex flex-col justify-between text-gray-800">
+
+    <!-- Top Utility Ribbon -->
+    <div class="bg-bise-darkgreen text-white text-xs py-1.5 px-4 no-print border-b border-bise-gold/30">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="flex items-center space-x-4">
+                <span><i class="fas font-sans fa-phone-alt text-bise-gold mr-1"></i> Helpline: +92 (42) 99200192-97</span>
+                <span class="hidden md:inline"><i class="fas fa-envelope text-bise-gold mr-1"></i> support@biselahore.com</span>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="bg-bise-gold text-bise-darkgreen px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Official Portal</span>
+                <span id="currentDate" class="text-gray-200"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Board Header Banner -->
+    <header class="bg-bise-green text-white shadow-lg border-b-4 border-bise-gold">
+        <div class="max-w-6xl mx-auto px-4 py-4 sm:py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Logo Badge & Title -->
+            <div class="flex items-center space-x-4 text-center md:text-left">
+                <!-- Authentic BISE Crest Representation -->
+                <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full p-1.5 shadow-md flex-shrink-0 flex items-center justify-center bise-badge border-2 border-bise-gold">
+                    <div class="w-full h-full rounded-full border-2 border-bise-green flex flex-col items-center justify-center p-1 text-center bg-green-50">
+                        <i class="fas fa-university text-bise-green text-2xl sm:text-3xl mb-0.5"></i>
+                        <span class="text-[8px] font-bold text-bise-darkgreen leading-tight">BISE LAHORE</span>
+                        <span class="text-[6px] text-gray-600">ESTD 1954</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h1 class="text-lg sm:text-2xl md:text-3xl font-bold font-serif tracking-wide text-white drop-shadow-sm">
+                        BOARD OF INTERMEDIATE & SECONDARY EDUCATION, LAHORE
+                    </h1>
+                    <p class="text-xs sm:text-sm text-bise-lightgold font-medium mt-0.5">
+                        مجلسِ تعلیماتِ ثانوی و اعلیٰ ثانوی، لاہور
+                    </p>
+                    <p class="text-xs text-emerald-200 mt-1 flex items-center justify-center md:justify-start gap-2">
+                        <i class="fas fa-check-circle text-bise-gold"></i>
+                        <span>Online Examination Result Search & Gazette System</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Quick Links Badge -->
+            <div class="hidden lg:flex flex-col items-end text-xs text-emerald-100 bg-bise-darkgreen/50 p-3 rounded-lg border border-emerald-600/40">
+                <span class="font-bold text-bise-gold mb-1"><i class="fas fa-shield-alt mr-1"></i> Verified Result Portal</span>
+                <span>Jurisdiction: Lahore, Kasur, Sheikhupura, Nankana Sahib</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Top Navigation Menu -->
+    <nav class="bg-white border-b border-gray-300 shadow-sm no-print">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between overflow-x-auto py-2 text-sm font-medium text-gray-700 whitespace-nowrap">
+                <a href="#" class="px-3 py-1.5 text-bise-green border-b-2 border-bise-green font-bold"><i class="fas fa-search mr-1.5"></i>Result Search</a>
+                <a href="#" class="px-3 py-1.5 hover:text-bise-green transition-colors"><i class="fas fa-book-open mr-1.5 text-gray-500"></i>Result Gazette</a>
+                <a href="#" class="px-3 py-1.5 hover:text-bise-green transition-colors"><i class="fas fa-file-contract mr-1.5 text-gray-500"></i>NOC / Migration</a>
+                <a href="#" class="px-3 py-1.5 hover:text-bise-green transition-colors"><i class="fas fa-certificate mr-1.5 text-gray-500"></i>E-Verification</a>
+                <a href="#" class="px-3 py-1.5 hover:text-bise-green transition-colors"><i class="fas fa-question-circle mr-1.5 text-gray-500"></i>Help & FAQ</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
+        
+        <!-- Animated High-Impact Motion Graphics Countdown Section for 1st Year Result -->
+        <div class="mb-8 countdown-container rounded-xl p-5 sm:p-7 border-2 border-bise-gold shadow-xl text-white">
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                
+                <!-- Info Header -->
+                <div class="text-center md:text-left space-y-1">
+                    <div class="inline-flex items-center gap-2 bg-bise-gold/20 text-bise-gold px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-bise-gold/40 mb-1">
+                        <span class="w-2 h-2 rounded-full bg-bise-gold animate-ping"></span>
+                        Official Result Notice 2026
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-serif font-bold text-white tracking-wide">
+                        HSSC Part-I (1st Year / 11th Class) Annual Result
+                    </h2>
+                    <p class="text-xs sm:text-sm text-emerald-200">
+                        Target Date: <strong class="text-bise-gold font-semibold">October 22, 2026 at 10:00 AM (PKT)</strong>
+                    </p>
+                </div>
+
+                <!-- Animated Timer Display Grid -->
+                <div id="countdownBox" class="flex items-center justify-center gap-2 sm:gap-3">
+                    
+                    <!-- Days -->
+                    <div class="countdown-card rounded-lg p-2.5 sm:p-3 w-16 sm:w-20 text-center">
+                        <span id="cdDays" class="block text-2xl sm:text-3xl font-bold font-mono text-bise-gold digit-animated">00</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-emerald-200">Days</span>
+                    </div>
+
+                    <span class="text-bise-gold text-xl font-bold pb-4">:</span>
+
+                    <!-- Hours -->
+                    <div class="countdown-card rounded-lg p-2.5 sm:p-3 w-16 sm:w-20 text-center">
+                        <span id="cdHours" class="block text-2xl sm:text-3xl font-bold font-mono text-bise-gold digit-animated">00</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-emerald-200">Hours</span>
+                    </div>
+
+                    <span class="text-bise-gold text-xl font-bold pb-4">:</span>
+
+                    <!-- Minutes -->
+                    <div class="countdown-card rounded-lg p-2.5 sm:p-3 w-16 sm:w-20 text-center">
+                        <span id="cdMinutes" class="block text-2xl sm:text-3xl font-bold font-mono text-bise-gold digit-animated">00</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-emerald-200">Mins</span>
+                    </div>
+
+                    <span class="text-bise-gold text-xl font-bold pb-4">:</span>
+
+                    <!-- Seconds -->
+                    <div class="countdown-card rounded-lg p-2.5 sm:p-3 w-16 sm:w-20 text-center border-bise-gold/70">
+                        <span id="cdSeconds" class="block text-2xl sm:text-3xl font-bold font-mono text-amber-300 digit-animated pulse-live">00</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-emerald-200">Secs</span>
+                    </div>
+
+                </div>
+
+                <!-- Live Status Banner (Visible after Countdown Expiration) -->
+                <div id="resultLiveBadge" class="hidden text-center md:text-right bg-emerald-500/20 border border-emerald-400 p-3 rounded-lg">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 uppercase tracking-widest">
+                        <i class="fas fa-check-circle text-emerald-400"></i> RESULTS ARE NOW LIVE
+                    </span>
+                    <p class="text-[11px] text-emerald-100">1st Year 2026 Gazettes & Slips Available Below</p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <!-- Result Search Card Form (Primary Interactive Area) -->
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-bise-green to-bise-darkgreen text-white px-6 py-4 border-b-2 border-bise-gold flex items-center justify-between">
+                    <h2 class="text-base sm:text-lg font-bold font-serif flex items-center gap-2">
+                        <i class="fas fa-graduation-cap text-bise-gold"></i>
+                        ONLINE RESULT SEARCH
+                    </h2>
+                    <span class="text-xs bg-emerald-800 text-emerald-100 px-2.5 py-1 rounded-full border border-emerald-600">Annual / Supply</span>
+                </div>
+
+                <form id="resultForm" class="p-6 sm:p-8 space-y-6" onsubmit="event.preventDefault(); handleSearch();">
+                    
+                    <!-- Examination Type -->
+                    <div>
+                        <label for="examType" class="block text-sm font-semibold text-gray-800 mb-2">
+                            1. Select Examination / Class <span class="text-red-500">*</span>
+                        </label>
+                        <select id="examType" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-2 focus:ring-bise-green focus:border-bise-green p-3 transition-colors font-medium">
+                            <option value="HSSC Annual Part-I (11th Class)" selected>HSSC Annual Part-I (11th Class / Intermediate)</option>
+                            <option value="HSSC Annual Part-II (12th Class)">HSSC Annual Part-II (12th Class / Intermediate)</option>
+                            <option value="SSC Annual Part-II (10th Class)">SSC Annual Part-II (10th Class / Matriculation)</option>
+                            <option value="SSC Annual Part-I (9th Class)">SSC Annual Part-I (9th Class / Matriculation)</option>
+                            <option value="SSC Supplementary Examination">SSC Supplementary Examination</option>
+                            <option value="HSSC Supplementary Examination">HSSC Supplementary Examination</option>
+                        </select>
+                    </div>
+
+                    <!-- Year & Session Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="examYear" class="block text-sm font-semibold text-gray-800 mb-2">
+                                2. Select Year <span class="text-red-500">*</span>
+                            </label>
+                            <select id="examYear" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-2 focus:ring-bise-green focus:border-bise-green p-3 transition-colors font-medium">
+                                <option value="2026" selected>2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="examCourse" class="block text-sm font-semibold text-gray-800 mb-2">
+                                3. Select Study Group
+                            </label>
+                            <select id="examCourse" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-2 focus:ring-bise-green focus:border-bise-green p-3 transition-colors font-medium">
+                                <option value="Pre-Engineering" selected>Pre-Engineering (HSSC)</option>
+                                <option value="Pre-Medical">Pre-Medical (HSSC)</option>
+                                <option value="ICS (Computer Science)">ICS (HSSC)</option>
+                                <option value="Science Group (Biology/Computer)">Science Group</option>
+                                <option value="Arts / Humanities Group">Arts / Humanities Group</option>
+                                <option value="Commerce Group">Commerce Group</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Roll Number Input Field -->
+                    <div>
+                        <label for="rollNo" class="block text-sm font-semibold text-gray-800 mb-2">
+                            4. Enter Roll Number <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-id-card text-lg"></i>
+                            </div>
+                            <input type="text" id="rollNo" placeholder="Enter Roll Number..." maxlength="7" pattern="[0-9]*"
+                                onkeypress="if(event.key === 'Enter'){ event.preventDefault(); handleSearch(); }"
+                                class="w-full bg-white border-2 border-gray-300 text-gray-900 text-lg font-bold rounded-md focus:ring-2 focus:ring-bise-green focus:border-bise-green pl-11 p-3 transition-colors tracking-widest placeholder-gray-400">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                            <i class="fas fa-info-circle text-bise-green"></i> Enter roll number and press <strong>Enter</strong> or click <strong>Get Result</strong>.
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                        <button type="submit" 
+                            class="flex-1 bg-bise-green hover:bg-bise-darkgreen text-white font-bold py-3.5 px-6 rounded-md shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-base border-b-2 border-bise-gold">
+                            <i class="fas fa-search"></i>
+                            GET RESULT
+                        </button>
+                        <button type="button" onclick="resetForm()" 
+                            class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3.5 px-6 rounded-md transition-colors flex items-center justify-center gap-2">
+                            <i class="fas fa-undo"></i>
+                            Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sidebar Instructions & Features -->
+            <div class="space-y-6">
+                <!-- Instructions Widget -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                    <h3 class="text-sm font-bold text-bise-darkgreen border-b border-gray-200 pb-2.5 mb-3 flex items-center gap-2">
+                        <i class="fas fa-list-check text-bise-gold"></i>
+                        Instructions for Candidates
+                    </h3>
+                    <ul class="text-xs text-gray-600 space-y-2.5 list-disc pl-4 leading-relaxed">
+                        <li>Ensure you have selected the correct examination year and session.</li>
+                        <li>Enter your Roll Number carefully as provided on your admit card.</li>
+                        <li>Provisional Result Cards can be downloaded or printed for temporary admission purposes.</li>
+                        <li>In case of any discrepancy in subject marks, candidates must apply for Rechecking within 15 days of result declaration.</li>
+                    </ul>
+                </div>
+
+                <!-- Verification Box -->
+                <div class="bg-emerald-50/70 border border-emerald-200 rounded-lg p-5 text-center">
+                    <div class="w-12 h-12 bg-bise-green text-bise-gold rounded-full flex items-center justify-center mx-auto mb-3 shadow">
+                        <i class="fas fa-stamp text-xl"></i>
+                    </div>
+                    <h4 class="font-bold text-bise-darkgreen text-sm">Official E-Verification</h4>
+                    <p class="text-xs text-gray-600 mt-1">All online result cards are digitally generated and carry official validation codes for institute submission.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Detailed Marks Certificate (DMC) Result Modal -->
+    <div id="resultModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 hidden overflow-y-auto">
+        
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full my-auto overflow-hidden border-2 border-bise-gold relative transform transition-all">
+            
+            <!-- Modal Header Actions (No Print) -->
+            <div class="bg-bise-darkgreen text-white px-4 py-3 flex items-center justify-between no-print border-b border-bise-gold">
+                <div class="flex items-center space-x-2 text-xs sm:text-sm font-semibold">
+                    <i class="fas fa-certificate text-bise-gold"></i>
+                    <span>Official Result Card Preview</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="window.print()" class="bg-bise-gold hover:bg-amber-500 text-bise-darkgreen text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1.5 shadow transition-colors">
+                        <i class="fas fa-print"></i> Print Result Card
+                    </button>
+                    <button onclick="closeModal()" class="text-gray-300 hover:text-white p-1 rounded-lg text-lg leading-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Certificate Document Body -->
+            <div id="printArea" class="p-6 sm:p-10 bg-white relative">
+                
+                <!-- Background Subtle Watermark -->
+                <div class="absolute inset-0 watermark-bg pointer-events-none"></div>
+
+                <!-- Certificate Border Frame -->
+                <div class="border-4 border-double border-bise-green p-4 sm:p-6 relative bg-white/90">
+                    
+                    <!-- Certificate Header -->
+                    <div class="text-center border-b-2 border-bise-gold pb-4 mb-5">
+                        <div class="flex items-center justify-between mb-2">
+                            <!-- Left Emblem -->
+                            <div class="w-16 h-16 rounded-full border border-bise-green flex items-center justify-center p-1 bg-green-50">
+                                <i class="fas fa-university text-bise-green text-2xl"></i>
+                            </div>
+
+                            <!-- Center Title -->
+                            <div class="text-center px-2">
+                                <h2 class="text-base sm:text-2xl font-bold font-serif text-bise-darkgreen tracking-wide">
+                                    BOARD OF INTERMEDIATE & SECONDARY EDUCATION, LAHORE
+                                </h2>
+                                <p class="text-xs font-bold text-bise-green uppercase tracking-wider mt-0.5" id="resExamHeader">
+                                    RESULT INTIMATION - SECONDARY SCHOOL CERTIFICATE (10TH CLASS) 2026
+                                </p>
+                                <span class="inline-block text-[10px] uppercase font-bold tracking-widest text-gray-500 bg-gray-100 px-3 py-0.5 rounded-full border border-gray-200 mt-1">
+                                    PROVISIONAL RESULT STATEMENT
+                                </span>
+                            </div>
+
+                            <!-- Right QR / Barcode Mock -->
+                            <div class="w-16 h-16 flex flex-col items-center justify-center text-center">
+                                <i class="fas fa-qrcode text-3xl text-gray-800"></i>
+                                <span class="text-[8px] font-mono text-gray-500 mt-0.5">VERIFIED</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Personal Details Table Grid -->
+                    <div class="bg-slate-50 border border-gray-300 rounded p-3 mb-5 text-xs text-gray-800 space-y-2">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div><span class="font-bold text-bise-darkgreen">Roll Number:</span> <span id="resRoll" class="font-mono font-bold text-black bg-emerald-100/60 px-2 py-0.5 rounded"></span></div>
+                            <div><span class="font-bold text-bise-darkgreen">Registration No:</span> <span id="resRegNo" class="font-mono font-medium"></span></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div><span class="font-bold text-bise-darkgreen">Student Name:</span> <span id="resStudentName" class="font-semibold uppercase text-black"></span></div>
+                            <div><span class="font-bold text-bise-darkgreen">Father's Name:</span> <span id="resFatherName" class="font-semibold uppercase text-black"></span></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div><span class="font-bold text-bise-darkgreen">Group / Course:</span> <span id="resGroup" class="font-medium"></span></div>
+                            <div><span class="font-bold text-bise-darkgreen">Exam Session:</span> <span id="resSession" class="font-medium">Annual 2026</span></div>
+                        </div>
+                        <div>
+                            <span class="font-bold text-bise-darkgreen">Institution / District:</span> <span id="resInst" class="font-medium text-gray-700"></span>
+                        </div>
+                        <div id="resMarksWordsContainer" class="pt-1 border-t border-gray-200">
+                            <span class="font-bold text-bise-darkgreen">Obtained Marks in Words:</span> <span id="resMarksWords" class="font-bold text-black italic capitalize"></span>
+                        </div>
+                    </div>
+
+                    <!-- Subject Wise Marks Table -->
+                    <div class="overflow-x-auto mb-5">
+                        <table class="w-full border-collapse text-xs text-left">
+                            <thead>
+                                <tr class="bg-bise-green text-white text-center font-serif">
+                                    <th class="border border-bise-darkgreen p-2 text-left">Sr.</th>
+                                    <th class="border border-bise-darkgreen p-2 text-left">Subject Name</th>
+                                    <th class="border border-bise-darkgreen p-2">Max Marks</th>
+                                    <th class="border border-bise-darkgreen p-2">Obtained Marks</th>
+                                    <th class="border border-bise-darkgreen p-2">Percent</th>
+                                    <th class="border border-bise-darkgreen p-2">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subjectTableBody" class="divide-y divide-gray-200 text-center font-medium">
+                                <!-- Dynamic Subject Rows Inject Here -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-emerald-50/80 font-bold border-t-2 border-bise-green text-center">
+                                    <td colspan="2" class="border border-gray-300 p-2 text-right font-serif text-bise-darkgreen">TOTAL MARKS:</td>
+                                    <td id="resMaxTotal" class="border border-gray-300 p-2">1100</td>
+                                    <td id="resObtainedTotal" class="border border-gray-300 p-2 text-bise-green text-sm">--</td>
+                                    <td id="resPercentage" class="border border-gray-300 p-2">--</td>
+                                    <td id="resOverallStatus" class="border border-gray-300 p-2 font-bold text-emerald-700">PASS</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Summary & Grade Box -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center mb-6">
+                        <div class="border border-gray-300 bg-emerald-50/50 p-2 rounded">
+                            <span class="block text-[10px] uppercase font-bold text-gray-500">Overall Grade</span>
+                            <span id="resGrade" class="text-xl font-bold text-bise-darkgreen">A+</span>
+                        </div>
+                        <div class="border border-gray-300 bg-emerald-50/50 p-2 rounded">
+                            <span class="block text-[10px] uppercase font-bold text-gray-500">Remarks</span>
+                            <span id="resRemarks" class="text-sm font-bold text-emerald-800">EXCELLENT</span>
+                        </div>
+                        <div class="border border-gray-300 bg-emerald-50/50 p-2 rounded">
+                            <span class="block text-[10px] uppercase font-bold text-gray-500">Result Status</span>
+                            <span class="text-sm font-bold text-emerald-700 flex items-center justify-center gap-1">
+                                <i class="fas fa-check-circle"></i> PROVISIONAL PASS
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Certificate Footer & Verification Signatures -->
+                    <div class="pt-6 border-t border-gray-300 text-[10px] text-gray-500 flex flex-col sm:flex-row justify-between items-end gap-4">
+                        <div class="space-y-1 text-left">
+                            <p><span class="font-bold text-gray-700">Result Declaration Date:</span> <span id="resIssueDate" class="font-bold text-black">22 October 2026</span></p>
+                            <p><span class="font-bold text-gray-700">System Reference:</span> BISE-LHR-2026-ONLINE-DOC</p>
+                            <p class="italic text-gray-400">Note: Errors/Omissions excepted. This is a computer generated result notification.</p>
+                        </div>
+                        <div class="text-center sm:text-right">
+                            <!-- Digital Signature Block for Controller of Examinations with Authentic Cursive SVG -->
+                            <div class="relative inline-block text-center">
+                                <div class="w-40 h-12 mx-auto flex items-center justify-center -mb-1">
+                                    <!-- Official Cursive Stylized SVG Signature -->
+                                    <svg class="w-36 h-10 text-emerald-900" viewBox="0 0 220 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M10 40 C 25 10, 35 5, 45 35 C 55 55, 60 10, 75 30 C 85 45, 95 15, 110 38 C 120 50, 130 10, 145 25 C 155 35, 165 20, 180 30 C 190 38, 200 15, 210 25" stroke="#00401e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M30 45 Q 90 52 200 42" stroke="#00401e" stroke-width="1.8" stroke-linecap="round"/>
+                                        <circle cx="195" cy="22" r="2.5" fill="#00401e"/>
+                                    </svg>
+                                </div>
+                                <div class="font-serif italic font-bold text-emerald-950 text-sm tracking-wider border-t border-gray-400 pt-0.5 px-4 mb-0.5">
+                                    Prof. M. A. Zahid
+                                </div>
+                                <span class="font-bold uppercase text-bise-darkgreen text-[11px] block">Controller of Examinations</span>
+                                <span class="block text-[8px] text-gray-500 font-semibold">Board of Intermediate & Secondary Education, Lahore</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Modal Footer Action (No Print) -->
+            <div class="bg-gray-100 px-6 py-3 no-print border-t border-gray-200 flex justify-end space-x-3">
+                <button onclick="closeModal()" class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-semibold rounded shadow transition-colors">
+                    Search Another Result
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- General Message Toast Modal -->
+    <div id="alertModal" class="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 text-center border-t-4 border-red-500">
+            <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-exclamation-triangle text-xl"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-900 mb-1" id="alertTitle">Input Required</h3>
+            <p class="text-xs text-gray-600 mb-5" id="alertMessage">Please enter a valid Roll Number to search result.</p>
+            <button onclick="closeAlert()" class="w-full bg-gray-800 hover:bg-black text-white text-xs font-bold py-2.5 rounded transition-colors">
+                OK, Understood
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer Banner -->
+    <footer class="bg-bise-darkgreen text-white text-xs py-6 mt-12 border-t-4 border-bise-gold no-print">
+        <div class="max-w-6xl mx-auto px-4 text-center sm:text-left grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div>
+                <h4 class="font-serif font-bold text-bise-gold text-sm mb-2">BISE LAHORE PORTAL</h4>
+                <p class="text-emerald-200 leading-relaxed text-[11px]">
+                    Board of Intermediate & Secondary Education, 86-Mozang Road, Lahore, Punjab, Pakistan.
+                </p>
+            </div>
+            <div>
+                <h4 class="font-serif font-bold text-bise-gold text-sm mb-2">QUICK LINKS</h4>
+                <ul class="space-y-1 text-emerald-200 text-[11px]">
+                    <li><a href="#" class="hover:underline">Online Rechecking System</a></li>
+                    <li><a href="#" class="hover:underline">Download Examination Forms</a></li>
+                    <li><a href="#" class="hover:underline">Board Gazette Download</a></li>
+                </ul>
+            </div>
+            <div class="text-center sm:text-right">
+                <p class="text-emerald-200 text-[11px]">&copy; 2026 BISE LAHORE. All Rights Reserved.</p>
+                <p class="text-gray-400 text-[10px] mt-1">Designed & Maintained for Educational Services</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        // Set Current Date in Header
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+        });
+
+        // 1st Year Result 2026 Target Date: 22 October 2026 at 10:00 AM PKT
+        const targetResultDate = new Date("October 22, 2026 10:00:00 GMT+0500").getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const timeDiff = targetResultDate - now;
+
+            const daysElem = document.getElementById('cdDays');
+            const hoursElem = document.getElementById('cdHours');
+            const minsElem = document.getElementById('cdMinutes');
+            const secsElem = document.getElementById('cdSeconds');
+            const liveBadge = document.getElementById('resultLiveBadge');
+            const countdownBox = document.getElementById('countdownBox');
+
+            if (timeDiff <= 0) {
+                // Countdown complete (22 Oct 10:00 AM reached or passed)
+                daysElem.innerText = "00";
+                hoursElem.innerText = "00";
+                minsElem.innerText = "00";
+                secsElem.innerText = "00";
+                
+                secsElem.classList.remove('pulse-live');
+                if (liveBadge) liveBadge.classList.remove('hidden');
+                return;
+            }
+
+            // Calculate remaining time units
+            const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+            // Format with leading zeroes
+            daysElem.innerText = String(days).padStart(2, '0');
+            hoursElem.innerText = String(hours).padStart(2, '0');
+            minsElem.innerText = String(minutes).padStart(2, '0');
+            secsElem.innerText = String(seconds).padStart(2, '0');
+        }
+
+        // Initialize and tick timer every second
+        updateCountdown();
+        const countdownInterval = setInterval(updateCountdown, 1000);
+
+        // Predefined Realistic Student Database Mock
+        const studentDatabase = {
+            "738966": {
+                name: "MUHAMMAD AWAIS",
+                father: "MUHAMMAD BASHARAT ALI",
+                regNo: "2025-GCUL-738966",
+                inst: "Government College University, Lahore (GCUL)",
+                examType: "HSSC Annual Part-I (11th Class)",
+                group: "F.Sc Pre-Engineering",
+                issueDate: "22 October 2026",
+                marksInWords: "FOUR HUNDRED AND NINETY-TWO ONLY",
+                marks: [
+                    { name: "English (Compulsory)", max: 100, obt: 82 },
+                    { name: "Urdu (Compulsory)", max: 100, obt: 81 },
+                    { name: "Islamic Education (Compulsory)", max: 50, obt: 45 },
+                    { name: "Tarjuma-tul-Quran-ul-Kareem", max: 50, obt: 46 },
+                    { name: "Mathematics", max: 100, obt: 88 },
+                    { name: "Physics", max: 85, obt: 76 },
+                    { name: "Chemistry", max: 85, obt: 74 }
+                ]
+            },
+            "511204": {
+                name: "Muhammad Ali Raza",
+                father: "Tariq Mahmood",
+                regNo: "2024-LHR-511204",
+                inst: "Govt. High School, Model Town, Lahore",
+                examType: "SSC Annual Part-II (10th Class)",
+                group: "Science Group",
+                issueDate: "22 October 2026",
+                marksInWords: "NINE HUNDRED AND NINETY-NINE ONLY",
+                marks: [
+                    { name: "English (Compulsory)", max: 150, obt: 132 },
+                    { name: "Urdu (Compulsory)", max: 150, obt: 128 },
+                    { name: "Islamic Education / Pak Studies", max: 100, obt: 88 },
+                    { name: "Mathematics", max: 150, obt: 142 },
+                    { name: "Physics (Theory + Practical)", max: 150, obt: 135 },
+                    { name: "Chemistry (Theory + Practical)", max: 150, obt: 130 },
+                    { name: "Computer Science / Biology", max: 150, obt: 138 },
+                    { name: "Tarjuma-tul-Quran-ul-Kareem", max: 100, obt: 92 }
+                ]
+            },
+            "623419": {
+                name: "Ayesha Fatima",
+                father: "Muhammad Usman Shah",
+                regNo: "2024-LHR-623419",
+                inst: "Kinnaird High School for Girls, Empress Road, Lahore",
+                examType: "SSC Annual Part-II (10th Class)",
+                group: "Science Group",
+                issueDate: "22 October 2026",
+                marksInWords: "ONE THOUSAND THIRTY-EIGHT ONLY",
+                marks: [
+                    { name: "English (Compulsory)", max: 150, obt: 141 },
+                    { name: "Urdu (Compulsory)", max: 150, obt: 136 },
+                    { name: "Islamic Education / Pak Studies", max: 100, obt: 91 },
+                    { name: "Mathematics", max: 150, obt: 148 },
+                    { name: "Physics (Theory + Practical)", max: 150, obt: 140 },
+                    { name: "Chemistry (Theory + Practical)", max: 150, obt: 139 },
+                    { name: "Biology (Theory + Practical)", max: 150, obt: 144 },
+                    { name: "Tarjuma-tul-Quran-ul-Kareem", max: 100, obt: 95 }
+                ]
+            }
+        };
+
+        function resetForm() {
+            document.getElementById('resultForm').reset();
+            document.getElementById('rollNo').value = '';
+        }
+
+        function showAlert(title, message) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = message;
+            document.getElementById('alertModal').classList.remove('hidden');
+        }
+
+        function closeAlert() {
+            document.getElementById('alertModal').classList.add('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').classList.add('hidden');
+        }
+
+        // Main Result Fetching Logic
+        function handleSearch() {
+            const rollInput = document.getElementById('rollNo').value.trim();
+            let examType = document.getElementById('examType').value;
+            const examYear = document.getElementById('examYear').value;
+            let examCourse = document.getElementById('examCourse').value;
+
+            // Input Validation
+            if (!rollInput) {
+                showAlert("Roll Number Missing", "Please enter your assigned Roll Number in the input box.");
+                return;
+            }
+
+            if (!/^\d+$/.test(rollInput)) {
+                showAlert("Invalid Format", "Roll Number must contain numeric digits only.");
+                return;
+            }
+
+            // Retrieve existing or dynamically generate realistic student record
+            let student = studentDatabase[rollInput];
+
+            if (!student) {
+                // Generate realistic dynamic data for any unlisted roll number
+                const seed = parseInt(rollInput);
+                const mockNames = ["Zain Malik", "Bilal Hassan", "Sana Parvez", "Usman Ghani", "Hafsa Bibi", "Omer Farooq"];
+                const mockFathers = ["Malik Rashid", "Hassan Mahmood", "Parvez Akhtar", "Ghani Muhammad", "Tariq Aziz"];
+                
+                const chosenName = mockNames[seed % mockNames.length];
+                const chosenFather = mockFathers[seed % mockFathers.length];
+
+                // Generate realistic mark distribution based on roll number
+                const baseObt = 80 + (seed % 65);
+                
+                student = {
+                    name: chosenName,
+                    father: chosenFather,
+                    regNo: `${examYear}-LHR-${rollInput}`,
+                    inst: "Govt. Higher Secondary School, Lahore District",
+                    examType: examType,
+                    group: examCourse,
+                    issueDate: "22 October 2026",
+                    marksInWords: "FOUR HUNDRED AND FIFTY ONLY",
+                    marks: [
+                        { name: "English (Compulsory)", max: 100, obt: Math.floor(baseObt * 0.82) },
+                        { name: "Urdu (Compulsory)", max: 100, obt: Math.floor(baseObt * 0.80) },
+                        { name: "Islamic Education", max: 50, obt: Math.floor(baseObt * 0.44) },
+                        { name: "Tarjuma-tul-Quran-ul-Kareem", max: 50, obt: Math.floor(baseObt * 0.45) },
+                        { name: "Mathematics", max: 100, obt: Math.floor(baseObt * 0.85) },
+                        { name: "Physics", max: 85, obt: Math.floor(baseObt * 0.72) },
+                        { name: "Chemistry", max: 85, obt: Math.floor(baseObt * 0.70) }
+                    ]
+                };
+            }
+
+            // Use student record specific examType/group if configured
+            const finalExamType = student.examType || examType;
+            const finalGroup = student.group || examCourse;
+
+            // Populate Certificate Header Info
+            document.getElementById('resExamHeader').innerText = `RESULT INTIMATION - ${finalExamType.toUpperCase()} ${examYear}`;
+            document.getElementById('resRoll').innerText = rollInput;
+            document.getElementById('resRegNo').innerText = student.regNo;
+            document.getElementById('resStudentName').innerText = student.name;
+            document.getElementById('resFatherName').innerText = student.father;
+            document.getElementById('resGroup').innerText = finalGroup;
+            document.getElementById('resSession').innerText = `Annual ${examYear}`;
+            document.getElementById('resInst').innerText = student.inst;
+            document.getElementById('resIssueDate').innerText = student.issueDate || "22 October 2026";
+            document.getElementById('resMarksWords').innerText = student.marksInWords || "";
+
+            // Populate Marks Table Body
+            const tbody = document.getElementById('subjectTableBody');
+            tbody.innerHTML = '';
+
+            let grandTotalObtained = 0;
+            let grandTotalMax = 0;
+
+            student.marks.forEach((sub, idx) => {
+                const subPct = Math.round((sub.obt / sub.max) * 100);
+                const status = subPct >= 33 ? 'PASS' : 'FAIL';
+                
+                grandTotalObtained += sub.obt;
+                grandTotalMax += sub.max;
+
+                const tr = document.createElement('tr');
+                tr.className = idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60';
+                tr.innerHTML = `
+                    <td class="border border-gray-300 p-2 text-left text-gray-500">${idx + 1}</td>
+                    <td class="border border-gray-300 p-2 text-left font-semibold text-gray-800">${sub.name}</td>
+                    <td class="border border-gray-300 p-2">${sub.max}</td>
+                    <td class="border border-gray-300 p-2 font-bold text-gray-900">${sub.obt}</td>
+                    <td class="border border-gray-300 p-2 text-gray-600">${subPct}%</td>
+                    <td class="border border-gray-300 p-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${status === 'PASS' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">${status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Calculate Overall Summary
+            const overallPct = ((grandTotalObtained / grandTotalMax) * 100).toFixed(1);
+            document.getElementById('resMaxTotal').innerText = grandTotalMax;
+            document.getElementById('resObtainedTotal').innerText = grandTotalObtained;
+            document.getElementById('resPercentage').innerText = `${overallPct}%`;
+
+            // Calculate Grade
+            let grade = 'A+';
+            let remarks = 'EXCELLENT';
+
+            if (overallPct >= 80) {
+                grade = 'A+';
+                remarks = 'EXCEPTIONAL';
+            } else if (overallPct >= 70) {
+                grade = 'A';
+                remarks = 'VERY GOOD';
+            } else if (overallPct >= 60) {
+                grade = 'B';
+                remarks = 'GOOD';
+            } else if (overallPct >= 50) {
+                grade = 'C';
+                remarks = 'FAIR / SATISFACTORY';
+            } else if (overallPct >= 33) {
+                grade = 'D';
+                remarks = 'PASS';
+            } else {
+                grade = 'F';
+                remarks = 'NEEDS IMPROVEMENT';
+            }
+
+            document.getElementById('resGrade').innerText = grade;
+            document.getElementById('resRemarks').innerText = remarks;
+
+            // Show Result Modal
+            document.getElementById('resultModal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
